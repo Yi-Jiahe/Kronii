@@ -7,30 +7,13 @@ module Main {
   var width;
   var height;
 
-  const RELATIVE_HOUR_HAND_LENGTH = 0.2;
-  const RELATIVE_MIN_HAND_LENGTH = 0.4;
+  const RELATIVE_HOUR_HAND_LENGTHS = [0.2, 0.25, 0.3, 0.275, 0.175];
+  const RELATIVE_MIN_HAND_LENGTHS = [0.4, 0.45, 0.35];
   const RELATIVE_SEC_HAND_LENGTH = 0.4;
 
   const RELATIVE_HOUR_HAND_STROKE = 0.013;
   const RELATIVE_MIN_HAND_STROKE = 0.013;
   const RELATIVE_SEC_HAND_STROKE = 0.01;
-
-  const COLORS = [
-    Graphics.COLOR_BLACK,
-    Graphics.COLOR_WHITE,
-    Graphics.COLOR_LT_GRAY,
-    Graphics.COLOR_DK_GRAY,
-    Graphics.COLOR_BLUE,
-    0x02084f,
-    Graphics.COLOR_RED,
-    0x730000,
-    Graphics.COLOR_GREEN,
-    0x004f15,
-    0xaa00ff,
-    Graphics.COLOR_PINK,
-    Graphics.COLOR_ORANGE,
-    Graphics.COLOR_YELLOW,
-  ];
 
   class KroniiView extends WatchUi.WatchFace {
     var lowPower = false;
@@ -78,7 +61,7 @@ module Main {
     }
 
     function drawBackground(dc) {
-      dc.setColor(0x004f94, 0x004f94);
+      dc.setColor(Graphics.COLOR_DK_BLUE, Graphics.COLOR_DK_BLUE);
       dc.clear();
     }
 
@@ -88,16 +71,13 @@ module Main {
       var minutes = clockTime.min;
       var seconds = clockTime.sec;
 
-      dc.setColor(0xffffff, Graphics.COLOR_TRANSPARENT);
-
       drawHand(
         dc,
         12.0,
         hours,
         60,
         minutes,
-        RELATIVE_HOUR_HAND_LENGTH * width,
-        RELATIVE_HOUR_HAND_STROKE * width
+        :hour
       );
       drawHand(
         dc,
@@ -105,8 +85,7 @@ module Main {
         minutes,
         60,
         seconds,
-        RELATIVE_MIN_HAND_LENGTH * width,
-        RELATIVE_MIN_HAND_STROKE * width
+        :minute
       );
       drawHand(
         dc,
@@ -114,12 +93,11 @@ module Main {
         seconds,
         0,
         0,
-        RELATIVE_SEC_HAND_LENGTH * width,
-        RELATIVE_SEC_HAND_STROKE * width
+        :second
       );
     }
 
-    function drawHand(dc, num, time, offsetNum, offsetTime, length, stroke) {
+    function drawHand(dc, num, time, offsetNum, offsetTime, hand) {
       var angle = Math.toRadians((360 / num) * time) - Math.PI / 2;
       var center = width / 2;
 
@@ -128,11 +106,47 @@ module Main {
         angle += Math.toRadians(section * offsetTime);
       }
 
-      var x2 = center + Math.round(Math.cos(angle) * length);
-      var y2 = center + Math.round(Math.sin(angle) * length);
+      if (hand == :hour) {
+        var lineWidth = RELATIVE_HOUR_HAND_STROKE * width;
 
-      dc.setPenWidth(stroke);
-      dc.drawLine(center, center, x2, y2);
+        dc.setPenWidth(lineWidth);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        for (var i = 0; i < 5; i++) {
+          var length = RELATIVE_HOUR_HAND_LENGTHS[i] * width;
+          var offset = (i - 2) * lineWidth;
+          var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
+          var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
+          var x1 = center + offsetX;
+          var y1 = center + offsetY;
+          var x2 = center + Math.round(Math.cos(angle) * length) + offsetX;
+          var y2 = center + Math.round(Math.sin(angle) * length) + offsetY;
+          dc.drawLine(x1, y1, x2, y2);
+        }
+      } else if (hand == :minute) {
+         var lineWidth = RELATIVE_MIN_HAND_STROKE * width;
+
+        dc.setPenWidth(lineWidth);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        for (var i = 0; i < 3; i++) {
+          var length = RELATIVE_MIN_HAND_LENGTHS[i] * width;
+          var offset = (i - 1) * lineWidth;
+          var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
+          var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
+          var x1 = center + offsetX;
+          var y1 = center + offsetY;
+          var x2 = center + Math.round(Math.cos(angle) * length) + offsetX;
+          var y2 = center + Math.round(Math.sin(angle) * length) + offsetY;
+          dc.drawLine(x1, y1, x2, y2);
+        }
+      } else if (hand == :second) {
+        dc.setPenWidth(RELATIVE_HOUR_HAND_STROKE * width);
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+  
+        var length = RELATIVE_SEC_HAND_LENGTH * width;
+        var x2 = center + Math.round(Math.cos(angle) * length);
+        var y2 = center + Math.round(Math.sin(angle) * length);
+        dc.drawLine(center, center, x2, y2);
+      }
     }
 
     // Called when this View is removed from the screen. Save the
