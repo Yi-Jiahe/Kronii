@@ -72,13 +72,26 @@ module Main {
     function drawTicks(dc) {
       dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
       var points = new [N_TICK_POINTS];
+      var scale;
 
-      var scale = MAJOR_TICK_SCALE * width;
-      var offset = [width/2, 0];
-      for (var i = 0; i < N_TICK_POINTS; i += 1){
-        points[i] = [TICK_POINTS[i][0] * scale + offset[0], TICK_POINTS[i][1] * scale + offset[1]];
+      for (var angle = 0; angle < 360; angle += 30) {
+        if (angle % 90 == 0) {
+          scale = MAJOR_TICK_SCALE * width;
+        } else {
+          scale = MINOR_TICK_SCALE * width;
+        }
+        var computedAngle = Math.toRadians((angle + 90) * -1);
+
+
+        var sineAngle = Math.sin(computedAngle);
+        var cosineAngle = Math.cos(computedAngle);
+        var offset = [width/2 * (1 + cosineAngle), width/2 * (1 + sineAngle)];
+
+        for (var i = 0; i < N_TICK_POINTS; i += 1){
+          points[i] = [offset[0] - (TICK_POINTS[i][0] * sineAngle + TICK_POINTS[i][1] * cosineAngle) * scale , offset[1] - (TICK_POINTS[i][0] * cosineAngle + TICK_POINTS[i][1] * sineAngle) * scale];
+        }
+        dc.fillPolygon(points);
       }
-      dc.fillPolygon(points);
     }
 
     function drawHands(dc) {
