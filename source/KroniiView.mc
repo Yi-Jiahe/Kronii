@@ -7,13 +7,13 @@ module Main {
   var width;
   var height;
 
-  const RELATIVE_HOUR_HAND_LENGTHS = [0.2, 0.25, 0.3, 0.275, 0.175];
-  const RELATIVE_MIN_HAND_LENGTHS = [0.4, 0.45, 0.35];
-  const RELATIVE_SEC_HAND_LENGTH = 0.4;
+  const RELATIVE_HOUR_HAND_LENGTHS = [0.18, 0.23, 0.3, 0.27, 0.15];
+  const RELATIVE_MIN_HAND_LENGTHS = [0.38, 0.42, 0.35];
+  const RELATIVE_SEC_HAND_LENGTH = 0.45;
 
-  const RELATIVE_HOUR_HAND_STROKE = 0.010;
-  const RELATIVE_MIN_HAND_STROKE = 0.010;
-  const RELATIVE_SEC_HAND_STROKE = 0.010;
+  const RELATIVE_HOUR_HAND_STROKE = 0.008;
+  const RELATIVE_MIN_HAND_STROKE = 0.008;
+  const RELATIVE_SEC_HAND_STROKE = 0.009;
 
   // Points for the tick at theta = 0 defined by the x-axis to the right and y-axis downwards, i.e. 3'o clock
   const TICK_POINTS = [[0, 0], [-0.866, 0.134], [-1, 1], [-1.5, 0.5], [-3, 0], [-1.5, -0.5], [-1, -1], [-0.866, -0.134]];
@@ -146,7 +146,7 @@ module Main {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         for (var i = 0; i < 5; i++) {
           var length = RELATIVE_HOUR_HAND_LENGTHS[i] * width;
-          var offset = (i - 2) * lineWidth * 2;
+          var offset = (i - 2) * lineWidth * 1.2;
           var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
           var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
           var x1 = center + offsetX;
@@ -155,6 +155,7 @@ module Main {
           var y2 = center + Math.round(Math.sin(angle) * length) + offsetY;
           dc.drawLine(x1, y1, x2, y2);
         }
+        dc.fillCircle(center, center, lineWidth * 4);
       } else if (hand == :minute) {
          var lineWidth = RELATIVE_MIN_HAND_STROKE * width;
 
@@ -162,7 +163,7 @@ module Main {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         for (var i = 0; i < 3; i++) {
           var length = RELATIVE_MIN_HAND_LENGTHS[i] * width;
-          var offset = (i - 2) * lineWidth * 2;
+          var offset = (i - 2) * lineWidth * 1.2;
           var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
           var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
           var x1 = center + offsetX;
