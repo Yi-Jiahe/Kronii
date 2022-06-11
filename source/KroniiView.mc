@@ -15,7 +15,8 @@ module Main {
   const RELATIVE_MIN_HAND_STROKE = 0.010;
   const RELATIVE_SEC_HAND_STROKE = 0.010;
 
-  const TICK_POINTS = [[0, 0], [0.134, 0.866], [1, 1], [0.5, 1.5], [0, 3], [-0.5, 1.5], [-1, 1], [-0.134, 0.866]];
+  // Points for the tick at theta = 0 defined by the x-axis to the right and y-axis downwards, i.e. 3'o clock
+  const TICK_POINTS = [[0, 0], [-0.866, 0.134], [-1, 1], [-1.5, 0.5], [-3, 0], [-1.5, -0.5], [-1, -1], [-0.866, -0.134]];
   const N_TICK_POINTS = TICK_POINTS.size();
   const MAJOR_TICK_SCALE = 0.030;
   const MINOR_TICK_SCALE = 0.020;
@@ -80,15 +81,18 @@ module Main {
         } else {
           scale = MINOR_TICK_SCALE * width;
         }
-        var computedAngle = Math.toRadians((angle + 90) * -1);
 
+        var computedAngle = Math.toRadians(angle);
 
+        var offset = [width/2 * (1 + Math.cos(computedAngle)), width/2 * (1 + Math.sin(computedAngle))];
         var sineAngle = Math.sin(computedAngle);
         var cosineAngle = Math.cos(computedAngle);
-        var offset = [width/2 * (1 + cosineAngle), width/2 * (1 + sineAngle)];
 
         for (var i = 0; i < N_TICK_POINTS; i += 1){
-          points[i] = [offset[0] - (TICK_POINTS[i][0] * sineAngle + TICK_POINTS[i][1] * cosineAngle) * scale , offset[1] - (TICK_POINTS[i][0] * cosineAngle + TICK_POINTS[i][1] * sineAngle) * scale];
+          // For a rotation in the positive direction about the origin
+          // x' = x*cos(theta) - y*sin(theta)
+          // y' = x*sin(theta) + y*cos(theta)
+          points[i] = [offset[0] + (TICK_POINTS[i][0] * cosineAngle - TICK_POINTS[i][1] * sineAngle) * scale, offset[1] + (TICK_POINTS[i][0] * sineAngle + TICK_POINTS[i][1] * cosineAngle) * scale];
         }
         dc.fillPolygon(points);
       }
