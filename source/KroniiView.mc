@@ -11,9 +11,14 @@ module Main {
   const RELATIVE_MIN_HAND_LENGTHS = [0.4, 0.45, 0.35];
   const RELATIVE_SEC_HAND_LENGTH = 0.4;
 
-  const RELATIVE_HOUR_HAND_STROKE = 0.013;
-  const RELATIVE_MIN_HAND_STROKE = 0.013;
-  const RELATIVE_SEC_HAND_STROKE = 0.01;
+  const RELATIVE_HOUR_HAND_STROKE = 0.010;
+  const RELATIVE_MIN_HAND_STROKE = 0.010;
+  const RELATIVE_SEC_HAND_STROKE = 0.010;
+
+  const TICK_POINTS = [[0, 0], [0.134, 0.866], [1, 1], [0.5, 1.5], [0, 3], [-0.5, 1.5], [-1, 1], [-0.134, 0.866]];
+  const N_TICK_POINTS = TICK_POINTS.size();
+  const MAJOR_TICK_SCALE = 0.030;
+  const MINOR_TICK_SCALE = 0.020;
 
   class KroniiView extends WatchUi.WatchFace {
     var lowPower = false;
@@ -45,12 +50,11 @@ module Main {
 
     // Update the view
     function onUpdate(dc as Dc) as Void {
-      if (lowPower) {
-        if (needsProtection) {
+      if (lowPower && needsProtection) {
           drawBackground(dc);
-        }
       } else {
         drawBackground(dc);
+        drawTicks(dc);
         drawHands(dc);
       }
 
@@ -61,8 +65,20 @@ module Main {
     }
 
     function drawBackground(dc) {
-      dc.setColor(Graphics.COLOR_DK_BLUE, Graphics.COLOR_DK_BLUE);
+      dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
       dc.clear();
+    }
+
+    function drawTicks(dc) {
+      dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
+      var points = new [N_TICK_POINTS];
+
+      var scale = MAJOR_TICK_SCALE * width;
+      var offset = [width/2, 0];
+      for (var i = 0; i < N_TICK_POINTS; i += 1){
+        points[i] = [TICK_POINTS[i][0] * scale + offset[0], TICK_POINTS[i][1] * scale + offset[1]];
+      }
+      dc.fillPolygon(points);
     }
 
     function drawHands(dc) {
@@ -113,7 +129,7 @@ module Main {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         for (var i = 0; i < 5; i++) {
           var length = RELATIVE_HOUR_HAND_LENGTHS[i] * width;
-          var offset = (i - 2) * lineWidth;
+          var offset = (i - 2) * lineWidth * 2;
           var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
           var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
           var x1 = center + offsetX;
@@ -129,7 +145,7 @@ module Main {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
         for (var i = 0; i < 3; i++) {
           var length = RELATIVE_MIN_HAND_LENGTHS[i] * width;
-          var offset = (i - 1) * lineWidth;
+          var offset = (i - 2) * lineWidth * 2;
           var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
           var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
           var x1 = center + offsetX;
@@ -140,7 +156,7 @@ module Main {
         }
       } else if (hand == :second) {
         dc.setPenWidth(RELATIVE_HOUR_HAND_STROKE * width);
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+        dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
   
         var length = RELATIVE_SEC_HAND_LENGTH * width;
         var x2 = center + Math.round(Math.cos(angle) * length);
