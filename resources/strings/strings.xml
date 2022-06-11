@@ -1,3 +1,26 @@
 <strings>
     <string id="AppName">Kronii</string>
+
+    <!-- Months -->
+    <string id="Mon0">JAN</string>
+    <string id="Mon1">FEB</string>
+    <string id="Mon2">MAR</string>
+    <string id="Mon3">APR</string>
+    <string id="Mon4">MAY</string>
+    <string id="Mon5">JUN</string>
+    <string id="Mon6">JUL</string>
+    <string id="Mon7">AUG</string>
+    <string id="Mon8">SEP</string>
+    <string id="Mon9">OCT</string>
+    <string id="Mon10">NOV</string>
+    <string id="Mon11">DEC</string>
+
+    <!-- Days of the week -->
+    <string id="Day0">SUN</string>
+    <string id="Day1">MON</string>
+    <string id="Day2">TUE</string>
+    <string id="Day3">WED</string>
+    <string id="Day4">THU</string>
+    <string id="Day5">FRI</string>
+    <string id="Day6">SAT</string>
 </strings>

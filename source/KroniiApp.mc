@@ -18,7 +18,7 @@ class KroniiApp extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() as Array<Views or InputDelegates>? {
-        return [ new Main.KroniiView() ] as Array<Views or InputDelegates>;
+        return [ new KroniiView() ] as Array<Views or InputDelegates>;
     }
 
     // New app settings have been received so trigger a UI update
