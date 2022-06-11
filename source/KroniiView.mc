@@ -17,7 +17,7 @@ class KroniiView extends WatchUi.WatchFace {
   const RELATIVE_BATTERY_HEIGHT = 0.04;
   const RELATIVE_BATTERY_STROKE = 0.007;
 
-  const RELATIVE_RING_RADIUS = 0.22;
+  const RELATIVE_RING_RADIUS = 0.23;
   const RELATIVE_RING_STROKE = 0.005;
 
   const RELATIVE_HOUR_HAND_LENGTHS = [0.18, 0.23, 0.3, 0.27, 0.15];
@@ -266,7 +266,14 @@ class KroniiView extends WatchUi.WatchFace {
 
     dc.setPenWidth(RELATIVE_RING_STROKE * width);
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-    dc.drawArc(center, center, RELATIVE_RING_RADIUS * width, Graphics.ARC_CLOCKWISE, 90, 90 - 360 * percent);
+    var arcStart = 90;
+    var arcEnd;
+    if (percent >= 1) {
+      arcEnd = arcStart - 359.99;
+    } else {
+      arcEnd = arcStart - 360 * percent;
+    }
+    dc.drawArc(center, center, RELATIVE_RING_RADIUS * width, Graphics.ARC_CLOCKWISE, arcStart, arcEnd);
   }
 
   // Called when this View is removed from the screen. Save the
