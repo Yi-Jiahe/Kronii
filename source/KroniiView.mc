@@ -3,6 +3,7 @@ import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
 import Toybox.Time;
+import Toybox.ActivityMonitor;
 
 class KroniiView extends WatchUi.WatchFace {
   const RELATIVE_WEEKDAY_POSITION_X = 0.13;
@@ -16,12 +17,15 @@ class KroniiView extends WatchUi.WatchFace {
   const RELATIVE_BATTERY_HEIGHT = 0.04;
   const RELATIVE_BATTERY_STROKE = 0.007;
 
+  const RELATIVE_RING_RADIUS = 0.22;
+  const RELATIVE_RING_STROKE = 0.005;
+
   const RELATIVE_HOUR_HAND_LENGTHS = [0.18, 0.23, 0.3, 0.27, 0.15];
   const RELATIVE_MIN_HAND_LENGTHS = [0.38, 0.42, 0.35];
   const RELATIVE_SEC_HAND_LENGTH = 0.45;
 
-  const RELATIVE_HOUR_HAND_STROKE = 0.010;
-  const RELATIVE_MIN_HAND_STROKE = 0.010;
+  const RELATIVE_HOUR_HAND_STROKE = 0.008;
+  const RELATIVE_MIN_HAND_STROKE = 0.009;
   const RELATIVE_SEC_HAND_STROKE = 0.010;
 
   // Points for the tick at theta = 0 defined by the x-axis to the right and y-axis downwards, i.e. 3'o clock
@@ -96,20 +100,26 @@ class KroniiView extends WatchUi.WatchFace {
     var seconds = clockTime.sec;
 
     var systemStats = System.getSystemStats();
+		var activityInfo = ActivityMonitor.getInfo();
+
+    var steps = activityInfo.steps;
+		var stepGoal = activityInfo.stepGoal;
 
     if (lowPower) {
       drawBackground(dc);
       drawTicks(dc);
       drawDate(dc);
       drawBattery(dc, systemStats);
+      drawRing(dc, 1.0 * steps / stepGoal);
 
-      drawHand(dc, 60, minutes, 60,seconds,:minute);
+      drawHand(dc, 60, minutes, 60, seconds, :minute);
       drawHand(dc, 12.0, hours, 60, minutes, :hour);
     } else {
       drawBackground(dc);
       drawTicks(dc);
       drawDate(dc);
       drawBattery(dc, systemStats);
+      drawRing(dc, 1.0 * steps / stepGoal);
 
       drawHand(dc, 60, seconds, 0,0, :second);
       drawHand(dc, 60, minutes, 60, seconds, :minute);
@@ -246,6 +256,17 @@ class KroniiView extends WatchUi.WatchFace {
     }
     dc.fillRectangle(batteryPositionX + lineWidth, batteryPositionY + 1.5 * lineWidth, battery * 0.01 * (batteryWidth - 2 * lineWidth), batteryHeight - 2.5 * lineWidth);
 
+  }
+
+  function drawRing(dc, percent) {
+    if (percent == 0) {
+      return;
+    }
+    var center = width / 2;
+
+    dc.setPenWidth(RELATIVE_RING_STROKE * width);
+    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+    dc.drawArc(center, center, RELATIVE_RING_RADIUS * width, Graphics.ARC_CLOCKWISE, 90, 90 - 360 * percent);
   }
 
   // Called when this View is removed from the screen. Save the
