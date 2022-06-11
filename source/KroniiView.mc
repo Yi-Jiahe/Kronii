@@ -10,6 +10,12 @@ class KroniiView extends WatchUi.WatchFace {
   const RELATIVE_DATE_POSITION_X = 0.13;
   const RELATIVE_DATE_POSITION_Y = 0.5;
 
+  const RELATIVE_BATTERY_POSITION_X = 0.37;
+  const RELATIVE_BATTERY_POSITION_Y = 0.17;
+  const RELATIVE_BATTERY_WIDTH = 0.07;
+  const RELATIVE_BATTERY_HEIGHT = 0.04;
+  const RELATIVE_BATTERY_STROKE = 0.007;
+
   const RELATIVE_HOUR_HAND_LENGTHS = [0.18, 0.23, 0.3, 0.27, 0.15];
   const RELATIVE_MIN_HAND_LENGTHS = [0.38, 0.42, 0.35];
   const RELATIVE_SEC_HAND_LENGTH = 0.45;
@@ -84,25 +90,26 @@ class KroniiView extends WatchUi.WatchFace {
 
   // Update the view
   function onUpdate(dc as Dc) as Void {
-    var dateinfo = Time.Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-
     var clockTime = System.getClockTime();
     var hours = clockTime.hour;
     var minutes = clockTime.min;
     var seconds = clockTime.sec;
 
+    var systemStats = System.getSystemStats();
 
     if (lowPower) {
       drawBackground(dc);
       drawTicks(dc);
-      drawDate(dc, dateinfo.month-1, dateinfo.day_of_week-1, dateinfo.day);
+      drawDate(dc);
+      drawBattery(dc, systemStats);
 
       drawHand(dc, 60, minutes, 60,seconds,:minute);
       drawHand(dc, 12.0, hours, 60, minutes, :hour);
     } else {
       drawBackground(dc);
       drawTicks(dc);
-      drawDate(dc, dateinfo.month-1, dateinfo.day_of_week-1, dateinfo.day);
+      drawDate(dc);
+      drawBattery(dc, systemStats);
 
       drawHand(dc, 60, seconds, 0,0, :second);
       drawHand(dc, 60, minutes, 60, seconds, :minute);
@@ -175,7 +182,7 @@ class KroniiView extends WatchUi.WatchFace {
       }
       dc.fillCircle(center, center, lineWidth * 4);
     } else if (hand == :minute) {
-        var lineWidth = RELATIVE_MIN_HAND_STROKE * width;
+      var lineWidth = RELATIVE_MIN_HAND_STROKE * width;
 
       dc.setPenWidth(lineWidth);
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
@@ -201,14 +208,44 @@ class KroniiView extends WatchUi.WatchFace {
     }
   }
 
-  function drawDate(dc, month_index, weekday_index, date) {
-		  var month = months[month_index];
-      var weekday = weekdays[weekday_index];
+  function drawDate(dc) {
+      var dateinfo = Time.Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+		  var month = months[dateinfo.month-1];
+      var weekday = weekdays[dateinfo.day_of_week-1];
+      var date = dateinfo.day;
 
       dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
       dc.drawText(RELATIVE_WEEKDAY_POSITION_X * width, RELATIVE_WEEKDAY_POSITION_Y * width, Graphics.FONT_XTINY, weekday, Graphics.TEXT_JUSTIFY_LEFT);
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       dc.drawText(RELATIVE_DATE_POSITION_X * width, RELATIVE_DATE_POSITION_Y * width, Graphics.FONT_XTINY, Lang.format("$1$ $2$", [month, date]), Graphics.TEXT_JUSTIFY_LEFT);
+  }
+
+  function drawBattery(dc, systemStats) {
+		var battery = systemStats.battery;
+
+    var batteryPositionX = RELATIVE_BATTERY_POSITION_X * width;
+    var batteryPositionY = RELATIVE_BATTERY_POSITION_Y * width;
+    var batteryWidth = RELATIVE_BATTERY_WIDTH * width;
+    var batteryHeight = RELATIVE_BATTERY_HEIGHT * width;
+    var lineWidth = RELATIVE_BATTERY_STROKE * width;
+
+    // Battery Border
+    dc.setPenWidth(lineWidth);
+    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+    dc.drawRectangle(batteryPositionX, batteryPositionY, batteryWidth, batteryHeight);
+    var x = batteryPositionX + batteryWidth + 0.2 * lineWidth;
+    dc.drawLine(x, batteryPositionY + 0.3 * batteryHeight, x, batteryPositionY + 0.7 * batteryHeight);
+
+    // Battery Indicator
+		if (battery < 10) {
+			dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);			
+		} else if (battery < 20) {
+			dc.setColor(Graphics.COLOR_ORANGE, Graphics.COLOR_TRANSPARENT);			
+		} else {
+      dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
+    }
+    dc.fillRectangle(batteryPositionX + lineWidth, batteryPositionY + 1.5 * lineWidth, battery * 0.01 * (batteryWidth - 2 * lineWidth), batteryHeight - 2.5 * lineWidth);
+
   }
 
   // Called when this View is removed from the screen. Save the
