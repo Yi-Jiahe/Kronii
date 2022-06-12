@@ -259,21 +259,28 @@ class KroniiView extends WatchUi.WatchFace {
   }
 
   function drawRing(dc, percent) {
-    if (percent == 0) {
-      return;
-    }
     var center = width / 2;
 
     dc.setPenWidth(RELATIVE_RING_STROKE * width);
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-    var arcStart = 90;
-    var arcEnd;
+    var radius = RELATIVE_RING_RADIUS * width;
     if (percent >= 1) {
-      arcEnd = arcStart - 359.99;
+      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+      dc.drawCircle(center, center, radius);
     } else {
-      arcEnd = arcStart - 360 * percent;
+      // dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+      // dc.drawCircle(center, center, radius);
+
+      for (var angle = 90; angle > -270; angle -= 7){
+        dc.drawArc(center, center, radius, Graphics.ARC_CLOCKWISE, angle, angle - 2);
+      }
+
+      if (percent != 0) {
+        var arcStart = 90;
+        var arcEnd = arcStart - 360 * percent;
+        dc.drawArc(center, center, radius, Graphics.ARC_CLOCKWISE, arcStart, arcEnd);
+      }
     }
-    dc.drawArc(center, center, RELATIVE_RING_RADIUS * width, Graphics.ARC_CLOCKWISE, arcStart, arcEnd);
   }
 
   // Called when this View is removed from the screen. Save the
