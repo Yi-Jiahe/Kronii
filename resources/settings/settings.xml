@@ -1,0 +1,25 @@
+<settings>
+	<setting propertyKey="@Properties.Field0Type" title="@Strings.DataField0Title">
+		<settingConfig type="list">
+            <listEntry value="-1">@Strings.Dash</listEntry>
+			<listEntry value="0">@Strings.HeartRate</listEntry>
+			<listEntry value="1">@Strings.Steps</listEntry>
+		</settingConfig>
+	</setting>
+
+    <setting propertyKey="@Properties.Field1Type" title="@Strings.DataField1Title">
+		<settingConfig type="list">
+            <listEntry value="-1">@Strings.Dash</listEntry>
+			<listEntry value="0">@Strings.HeartRate</listEntry>
+			<listEntry value="1">@Strings.Steps</listEntry>
+		</settingConfig>
+	</setting>
+
+	<setting propertyKey="@Properties.Field2Type" title="@Strings.DataField2Title">
+		<settingConfig type="list">
+            <listEntry value="-1">@Strings.Dash</listEntry>
+			<listEntry value="0">@Strings.HeartRate</listEntry>
+			<listEntry value="1">@Strings.Steps</listEntry>
+		</settingConfig>
+	</setting>
+</settings>

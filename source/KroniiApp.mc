@@ -3,6 +3,7 @@ import Toybox.Lang;
 import Toybox.WatchUi;
 
 class KroniiApp extends Application.AppBase {
+	var fieldTypes = new [3];
 
     function initialize() {
         AppBase.initialize();
@@ -18,11 +19,26 @@ class KroniiApp extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() as Array<Views or InputDelegates>? {
+        onSettingsChanged();
         return [ new KroniiView() ] as Array<Views or InputDelegates>;
     }
 
+	function getIntProperty(key, defaultValue) {
+		var value = getProperty(key);
+		if (value == null) {
+			value = defaultValue;
+		} else if (!(value instanceof Number)) {
+			value = value.toNumber();
+		}
+		return value;
+	}
+
     // New app settings have been received so trigger a UI update
     function onSettingsChanged() {
+        fieldTypes[0] = getIntProperty("Field0Type", 0);
+		fieldTypes[1] = getIntProperty("Field1Type", 1);
+		fieldTypes[2] = getIntProperty("Field2Type", -1);
+
         WatchUi.requestUpdate();
     }
 }
