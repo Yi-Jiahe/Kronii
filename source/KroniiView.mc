@@ -4,8 +4,15 @@ import Toybox.System;
 import Toybox.WatchUi;
 import Toybox.Time;
 import Toybox.ActivityMonitor;
+using Toybox.UserProfile;
 
 class KroniiView extends WatchUi.WatchFace {
+  // Points for the tick at theta = 0 defined by the x-axis to the right and y-axis downwards, i.e. 3'o clock
+  const TICK_POINTS = [[0, 0], [-0.866, 0.134], [-1, 1], [-1.5, 0.5], [-3, 0], [-1.5, -0.5], [-1, -1], [-0.866, -0.134]];
+  const N_TICK_POINTS = TICK_POINTS.size();
+  const MAJOR_TICK_SCALE = 0.025;
+  const MINOR_TICK_SCALE = 0.020;
+
   const RELATIVE_WEEKDAY_POSITION_X = 0.13;
   const RELATIVE_WEEKDAY_POSITION_Y = 0.42;
   const RELATIVE_DATE_POSITION_X = 0.13;
@@ -19,6 +26,10 @@ class KroniiView extends WatchUi.WatchFace {
 
   const RELATIVE_RING_RADIUS = 0.23;
   const RELATIVE_RING_STROKE = 0.005;
+  
+  // Order is right, down, up
+  const RELATIVE_STAT_POSITIONS = [[0.75, 0.35],[0.6, 0.5], [0.6, 0.2]];
+  const RELATIVE_STAT_WIDTH = 0.3;
 
   const RELATIVE_HOUR_HAND_LENGTHS = [0.18, 0.23, 0.3, 0.27, 0.15];
   const RELATIVE_MIN_HAND_LENGTHS = [0.38, 0.42, 0.35];
@@ -27,12 +38,6 @@ class KroniiView extends WatchUi.WatchFace {
   const RELATIVE_HOUR_HAND_STROKE = 0.008;
   const RELATIVE_MIN_HAND_STROKE = 0.009;
   const RELATIVE_SEC_HAND_STROKE = 0.010;
-
-  // Points for the tick at theta = 0 defined by the x-axis to the right and y-axis downwards, i.e. 3'o clock
-  const TICK_POINTS = [[0, 0], [-0.866, 0.134], [-1, 1], [-1.5, 0.5], [-3, 0], [-1.5, -0.5], [-1, -1], [-0.866, -0.134]];
-  const N_TICK_POINTS = TICK_POINTS.size();
-  const MAJOR_TICK_SCALE = 0.025;
-  const MINOR_TICK_SCALE = 0.020;
 
   var width;
   var height;
@@ -105,26 +110,19 @@ class KroniiView extends WatchUi.WatchFace {
     var steps = activityInfo.steps;
 		var stepGoal = activityInfo.stepGoal;
 
-    if (lowPower) {
       drawBackground(dc);
       drawTicks(dc);
       drawDate(dc);
       drawBattery(dc, systemStats);
       drawRing(dc, 1.0 * steps / stepGoal);
-
-      drawHand(dc, 60, minutes, 60, seconds, :minute);
-      drawHand(dc, 12.0, hours, 60, minutes, :hour);
-    } else {
-      drawBackground(dc);
-      drawTicks(dc);
-      drawDate(dc);
-      drawBattery(dc, systemStats);
-      drawRing(dc, 1.0 * steps / stepGoal);
-
+      drawStats(dc);
+      
+      if (lowPower){
+        // Maybe don't draw second hand
+      }
       drawHand(dc, 60, seconds, 0,0, :second);
       drawHand(dc, 60, minutes, 60, seconds, :minute);
       drawHand(dc, 12.0, hours, 60, minutes, :hour);
-    }
 
     //   var view = View.findDrawableById("TimeLabel") as Text;
 
@@ -265,7 +263,6 @@ class KroniiView extends WatchUi.WatchFace {
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
     var radius = RELATIVE_RING_RADIUS * width;
     if (percent >= 1) {
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       dc.drawCircle(center, center, radius);
     } else {
       // dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
@@ -280,6 +277,79 @@ class KroniiView extends WatchUi.WatchFace {
         var arcEnd = arcStart - 360 * percent;
         dc.drawArc(center, center, radius, Graphics.ARC_CLOCKWISE, arcStart, arcEnd);
       }
+    }
+  }
+
+  function drawStats(dc) {
+    dc.setPenWidth(RELATIVE_RING_STROKE * width);
+    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+
+    var fieldTypes = [:HEART_RATE, :STEPS];
+
+    // Field Types has to be smaller than relative stat positions
+    for (var i = 0; i < fieldTypes.size(); i += 1){
+      var offset = [RELATIVE_STAT_POSITIONS[i][0] * width, RELATIVE_STAT_POSITIONS[i][1] * width];
+      var x1 = offset[0];
+      var y1 = offset[1];
+      var x2 = offset[0] + width * RELATIVE_STAT_WIDTH/2;
+      var y2 = offset[1] + width * RELATIVE_STAT_WIDTH/2;
+      var x3 = offset[0];
+      var y3 = offset[1] + width * RELATIVE_STAT_WIDTH;
+      var x4 = offset[0] - width * RELATIVE_STAT_WIDTH/2;
+      var y4 = y2;
+      dc.drawLine(x1, y1, x2, y2);
+      dc.drawLine(x2, y2, x3, y3);
+      dc.drawLine(x3, y3, x4, y4);
+      dc.drawLine(x4, y4, x1, y1);
+
+      var icon = "-";
+      var value = "N/A";
+      var iconColor = Graphics.COLOR_WHITE;
+      var valueColor = Graphics.COLOR_WHITE;
+      var fieldType = fieldTypes[i];
+
+      switch (fieldType) {
+        case :HEART_RATE:
+          icon = "H";
+          iconColor = Graphics.COLOR_RED;
+
+          var hrIterator = ActivityMonitor.getHeartRateHistory(1, true);
+				  value = hrIterator.next().heartRate;
+          System.print(value);
+          if (value == null) {
+            value = "N/A";
+            break;
+          }
+
+          var genericZoneInfo = UserProfile.getHeartRateZones(UserProfile.HR_ZONE_SPORT_GENERIC);
+
+          // There aren't enough colors for the first 2 zones to be different
+          if (value < genericZoneInfo[1]) {
+          } else if (value < genericZoneInfo[2]) {
+            valueColor = Graphics.COLOR_BLUE;
+          } else if (value < genericZoneInfo[3]) {
+            valueColor = Graphics.COLOR_GREEN;
+          } else if (value < genericZoneInfo[4]) {
+            valueColor = Graphics.COLOR_ORANGE;
+          } else if (value < genericZoneInfo[5]) {
+            valueColor = Graphics.COLOR_RED;
+          }
+
+          break;
+        case :STEPS:
+          icon = "S";
+          iconColor = Graphics.COLOR_YELLOW;
+
+		      var activityInfo = ActivityMonitor.getInfo();
+          value = activityInfo.steps;
+
+          break;
+      }
+
+      dc.setColor(iconColor, Graphics.COLOR_TRANSPARENT);
+      dc.drawText(offset[0], y1, Graphics.FONT_XTINY, icon, Graphics.TEXT_JUSTIFY_CENTER);
+      dc.setColor(valueColor, Graphics.COLOR_TRANSPARENT);
+      dc.drawText(offset[0], y2, Graphics.FONT_XTINY, value, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
   }
 
