@@ -127,7 +127,7 @@ class KroniiView extends WatchUi.WatchFace {
       drawRing(dc, 1.0 * steps / stepGoal);
       drawStats(dc);
       
-      if (lowPower){
+      if (!lowPower){
         drawHand(dc, 60, seconds, 0,0, :second);
       }
       drawHand(dc, 60, minutes, 60, seconds, :minute);
