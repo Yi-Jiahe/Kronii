@@ -4,6 +4,7 @@
             <listEntry value="-1">@Strings.Dash</listEntry>
 			<listEntry value="0">@Strings.HeartRate</listEntry>
 			<listEntry value="1">@Strings.Steps</listEntry>
+            <listEntry value="2">@Strings.Distance</listEntry>
 		</settingConfig>
 	</setting>
 
@@ -12,6 +13,7 @@
             <listEntry value="-1">@Strings.Dash</listEntry>
 			<listEntry value="0">@Strings.HeartRate</listEntry>
 			<listEntry value="1">@Strings.Steps</listEntry>
+            <listEntry value="2">@Strings.Distance</listEntry>
 		</settingConfig>
 	</setting>
 
@@ -20,6 +22,7 @@
             <listEntry value="-1">@Strings.Dash</listEntry>
 			<listEntry value="0">@Strings.HeartRate</listEntry>
 			<listEntry value="1">@Strings.Steps</listEntry>
+            <listEntry value="2">@Strings.Distance</listEntry>
 		</settingConfig>
 	</setting>
 </settings>

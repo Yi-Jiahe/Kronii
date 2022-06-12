@@ -27,6 +27,7 @@
     <string id="Dash">-</string>
     <string id="HeartRate">Heart Rate</string>
     <string id="Steps">Steps</string>
+    <string id="Distance">Distance</string>
 
 	<string id="DataField0Title">Data Field 1</string>
 	<string id="DataField1Title">Data Field 2</string>

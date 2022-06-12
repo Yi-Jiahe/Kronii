@@ -47,6 +47,7 @@ class KroniiView extends WatchUi.WatchFace {
     // Real fields (used by properties).
     FIELD_TYPE_HEART_RATE = 0,
     FIELD_TYPE_STEPS,
+    FIELD_TYPE_DISTANCE
   }
 
   var width;
@@ -289,11 +290,12 @@ class KroniiView extends WatchUi.WatchFace {
   }
 
   function drawStats(dc) {
-    dc.setPenWidth(RELATIVE_RING_STROKE * width);
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-
 		var fieldTypes = Application.getApp().fieldTypes;
-    System.println(fieldTypes);
+
+    var hrIterator = ActivityMonitor.getHeartRateHistory(1, true);
+    var activityInfo = ActivityMonitor.getInfo();
+    var settings = System.getDeviceSettings();
+
 
     // Field Types has to be smaller than relative stat positions
     for (var i = 0; i < fieldTypes.size(); i += 1){
@@ -312,6 +314,8 @@ class KroniiView extends WatchUi.WatchFace {
       var y3 = offset[1] + width * RELATIVE_STAT_WIDTH;
       var x4 = offset[0] - width * RELATIVE_STAT_WIDTH/2;
       var y4 = y2;
+      dc.setPenWidth(RELATIVE_RING_STROKE * width);
+      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       dc.drawLine(x1, y1, x2, y2);
       dc.drawLine(x2, y2, x3, y3);
       dc.drawLine(x3, y3, x4, y4);
@@ -327,9 +331,7 @@ class KroniiView extends WatchUi.WatchFace {
           icon = "H";
           iconColor = Graphics.COLOR_RED;
 
-          var hrIterator = ActivityMonitor.getHeartRateHistory(1, true);
 				  value = hrIterator.next().heartRate;
-          System.print(value);
           if (value == null) {
             value = "N/A";
             break;
@@ -354,8 +356,30 @@ class KroniiView extends WatchUi.WatchFace {
           icon = "S";
           iconColor = Graphics.COLOR_YELLOW;
 
-		      var activityInfo = ActivityMonitor.getInfo();
           value = activityInfo.steps;
+
+          break;
+        case FIELD_TYPE_DISTANCE:
+          icon = "D";
+          iconColor = Graphics.COLOR_RED;
+
+          value = activityInfo.distance.toFloat() / /* CM_PER_KM */ 100000;
+
+          var unit;
+          if (settings.distanceUnits == System.UNIT_METRIC) {
+            unit = "km";					
+          } else {
+            value *= /* MI_PER_KM */ 0.621371;
+            unit = "mi";
+          }
+
+          value = value.format("%.1f");
+
+          // Show unit only if value plus unit fits within maximum field length.
+          // if ((value.length() + unit.length()) <= mMaxFieldLength) {
+          //   value += unit;
+          // }
+          value += unit;
 
           break;
       }
