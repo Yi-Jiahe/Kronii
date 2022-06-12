@@ -52,6 +52,9 @@ class KroniiView extends WatchUi.WatchFace {
   var width;
   var height;
 
+  var backgroundLayer;
+  var foregroundLayer;
+
   var lowPower = false;
   var needsProtection = false;
 
@@ -85,6 +88,13 @@ class KroniiView extends WatchUi.WatchFace {
 			WatchUi.loadResource(Rez.Strings.Day5),
 			WatchUi.loadResource(Rez.Strings.Day6)
 		];
+
+   if (
+      System.getDeviceSettings() has :requiresBurnInProtection &&
+      System.getDeviceSettings().requiresBurnInProtection
+    ) {
+      needsProtection = true;
+    }
   }
 
   // Load your resources here
@@ -92,12 +102,11 @@ class KroniiView extends WatchUi.WatchFace {
     width = dc.getWidth();
     height = dc.getHeight();
 
-    if (
-      System.getDeviceSettings() has :requiresBurnInProtection &&
-      System.getDeviceSettings().requiresBurnInProtection
-    ) {
-      needsProtection = true;
-    }
+    backgroundLayer = new WatchUi.Layer({:x=>0, :y=>0, :width=>width, :height=>height});
+    addLayer(backgroundLayer);
+
+    foregroundLayer = new WatchUi.Layer({:x=>0, :y=>0, :width=>width, :height=>height});
+    addLayer(foregroundLayer);
 
     setLayout(Rez.Layouts.WatchFace(dc));
   }
@@ -120,18 +129,23 @@ class KroniiView extends WatchUi.WatchFace {
     var steps = activityInfo.steps;
 		var stepGoal = activityInfo.stepGoal;
 
-      drawBackground(dc);
-      drawTicks(dc);
-      drawDate(dc);
-      drawBattery(dc, systemStats);
-      drawRing(dc, 1.0 * steps / stepGoal);
-      drawStats(dc);
-      
-      if (!lowPower){
-        drawHand(dc, 60, seconds, 0,0, :second);
-      }
-      drawHand(dc, 60, minutes, 60, seconds, :minute);
-      drawHand(dc, 12.0, hours, 60, minutes, :hour);
+    var layers = View.getLayers();
+    var backgroundDc = layers[0].getDc();
+    var foregroundDc = layers[1].getDc();
+
+    drawBackground(backgroundDc);
+    drawTicks(backgroundDc);
+    drawDate(backgroundDc);
+    drawBattery(backgroundDc, systemStats);
+    drawRing(backgroundDc, 1.0 * steps / stepGoal);
+    drawStats(backgroundDc);
+
+    clearForeground(foregroundDc);
+    if (!lowPower) {
+      drawHand(foregroundDc, 60, seconds, 0, 0, :second);
+    }
+    drawHand(foregroundDc, 60, minutes, 60, seconds, :minute);
+    drawHand(foregroundDc, 12.0, hours, 60, minutes, :hour);
 
     //   var view = View.findDrawableById("TimeLabel") as Text;
 
@@ -139,8 +153,25 @@ class KroniiView extends WatchUi.WatchFace {
     //   View.onUpdate(dc);
   }
 
+  function onPartialUpdate(dc) as Void {
+    System.println("Parital Update");
+
+    var layers = View.getLayers();
+    var foregroundDc = layers[1].getDc();
+
+    clearForeground(foregroundDc);
+    drawHand(foregroundDc, 60, seconds, 0,0, :second);
+    drawHand(foregroundDc, 60, minutes, 60, seconds, :minute);
+    drawHand(foregroundDc, 12.0, hours, 60, minutes, :hour);
+  }
+
   function drawBackground(dc) {
     dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+    dc.clear();
+  }
+
+  function clearForeground(dc) {
+    dc.setColor(Graphics.COLOR_TRANSPARENT, Graphics.COLOR_TRANSPARENT);
     dc.clear();
   }
 
@@ -215,7 +246,7 @@ class KroniiView extends WatchUi.WatchFace {
         dc.drawLine(x1, y1, x2, y2);
       }
     } else if (hand == :second) {
-      dc.setPenWidth(RELATIVE_HOUR_HAND_STROKE * width);
+      dc.setPenWidth(RELATIVE_SEC_HAND_STROKE * width);
       dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
 
       var length = RELATIVE_SEC_HAND_LENGTH * width;
@@ -231,9 +262,9 @@ class KroniiView extends WatchUi.WatchFace {
       var weekday = weekdays[dateinfo.day_of_week-1];
       var date = dateinfo.day;
 
-      dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_TRANSPARENT);
+      dc.setColor(Graphics.COLOR_YELLOW, Graphics.COLOR_BLACK);
       dc.drawText(RELATIVE_WEEKDAY_POSITION_X * width, RELATIVE_WEEKDAY_POSITION_Y * width, Graphics.FONT_XTINY, weekday, Graphics.TEXT_JUSTIFY_LEFT);
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
       dc.drawText(RELATIVE_DATE_POSITION_X * width, RELATIVE_DATE_POSITION_Y * width, Graphics.FONT_XTINY, Lang.format("$1$ $2$", [month, date]), Graphics.TEXT_JUSTIFY_LEFT);
   }
 
@@ -290,11 +321,7 @@ class KroniiView extends WatchUi.WatchFace {
   }
 
   function drawStats(dc) {
-    dc.setPenWidth(RELATIVE_RING_STROKE * width);
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
-
 		var fieldTypes = Application.getApp().fieldTypes;
-    System.println(fieldTypes);
 
     // Field Types has to be smaller than relative stat positions
     for (var i = 0; i < fieldTypes.size(); i += 1){
@@ -313,6 +340,8 @@ class KroniiView extends WatchUi.WatchFace {
       var y3 = offset[1] + width * RELATIVE_STAT_WIDTH;
       var x4 = offset[0] - width * RELATIVE_STAT_WIDTH/2;
       var y4 = y2;
+      dc.setPenWidth(RELATIVE_RING_STROKE * width);
+      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       dc.drawLine(x1, y1, x2, y2);
       dc.drawLine(x2, y2, x3, y3);
       dc.drawLine(x3, y3, x4, y4);
@@ -330,7 +359,6 @@ class KroniiView extends WatchUi.WatchFace {
 
           var hrIterator = ActivityMonitor.getHeartRateHistory(1, true);
 				  value = hrIterator.next().heartRate;
-          System.print(value);
           if (value == null) {
             value = "N/A";
             break;
@@ -361,9 +389,9 @@ class KroniiView extends WatchUi.WatchFace {
           break;
       }
 
-      dc.setColor(iconColor, Graphics.COLOR_TRANSPARENT);
+      dc.setColor(iconColor, Graphics.COLOR_BLACK);
       dc.drawText(offset[0], y1, Graphics.FONT_XTINY, icon, Graphics.TEXT_JUSTIFY_CENTER);
-      dc.setColor(valueColor, Graphics.COLOR_TRANSPARENT);
+      dc.setColor(valueColor, Graphics.COLOR_BLACK);
       dc.drawText(offset[0], y2, Graphics.FONT_XTINY, value, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
   }
