@@ -188,7 +188,7 @@ class KroniiView extends WatchUi.WatchFace {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       for (var i = 0; i < 5; i++) {
         var length = RELATIVE_HOUR_HAND_LENGTHS[i] * width;
-        var offset = (i - 2) * lineWidth * 1.5;
+        var offset = (i - 2) * lineWidth * 1.7;
         var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
         var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
         var x1 = center + offsetX;
@@ -197,7 +197,7 @@ class KroniiView extends WatchUi.WatchFace {
         var y2 = center + Math.round(Math.sin(angle) * length) + offsetY;
         dc.drawLine(x1, y1, x2, y2);
       }
-      dc.fillCircle(center, center, lineWidth * 4);
+      dc.fillCircle(center, center, lineWidth * 4.5);
     } else if (hand == :minute) {
       var lineWidth = RELATIVE_MIN_HAND_STROKE * width;
 
@@ -205,7 +205,7 @@ class KroniiView extends WatchUi.WatchFace {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       for (var i = 0; i < 3; i++) {
         var length = RELATIVE_MIN_HAND_LENGTHS[i] * width;
-        var offset = (i - 2) * lineWidth * 1.5;
+        var offset = (i - 1) * lineWidth * 1.5;
         var offsetX = Math.round(Math.cos(angle + Math.PI / 2)) * offset;
         var offsetY = Math.round(Math.sin(angle + Math.PI / 2)) * offset;
         var x1 = center + offsetX;
@@ -262,7 +262,6 @@ class KroniiView extends WatchUi.WatchFace {
       dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
     }
     dc.fillRectangle(batteryPositionX + lineWidth, batteryPositionY + 1.5 * lineWidth, (battery * 0.01) * (batteryWidth - 3 * lineWidth), batteryHeight - 2.5 * lineWidth);
-
   }
 
   function drawRing(dc, percent) {
