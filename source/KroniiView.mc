@@ -247,14 +247,14 @@ class KroniiView extends WatchUi.WatchFace {
     dc.drawLine(x, batteryPositionY + 0.3 * batteryHeight, x, batteryPositionY + 0.7 * batteryHeight);
 
     // Battery Indicator
-		if (battery < 10) {
+		if (battery < 5) {
 			dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_TRANSPARENT);			
-		} else if (battery < 20) {
+		} else if (battery < 15) {
 			dc.setColor(Graphics.COLOR_ORANGE, Graphics.COLOR_TRANSPARENT);			
 		} else {
       dc.setColor(Graphics.COLOR_GREEN, Graphics.COLOR_TRANSPARENT);
     }
-    dc.fillRectangle(batteryPositionX + lineWidth, batteryPositionY + 1.5 * lineWidth, battery * 0.01 * (batteryWidth - 2 * lineWidth), batteryHeight - 2.5 * lineWidth);
+    dc.fillRectangle(batteryPositionX + lineWidth, batteryPositionY + 1.5 * lineWidth, (battery * 0.01) * (batteryWidth - 3 * lineWidth), batteryHeight - 2.5 * lineWidth);
 
   }
 
