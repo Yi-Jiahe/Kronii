@@ -1,3 +1,4 @@
+import Toybox.Application;
 import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.System;
@@ -38,6 +39,15 @@ class KroniiView extends WatchUi.WatchFace {
   const RELATIVE_HOUR_HAND_STROKE = 0.008;
   const RELATIVE_MIN_HAND_STROKE = 0.009;
   const RELATIVE_SEC_HAND_STROKE = 0.010;
+
+  enum /* FIELD_TYPES */ {
+    // Pseudo-fields.	
+    FIELD_TYPE_NONE = -1,	
+
+    // Real fields (used by properties).
+    FIELD_TYPE_HEART_RATE = 0,
+    FIELD_TYPE_STEPS,
+  }
 
   var width;
   var height;
@@ -283,10 +293,17 @@ class KroniiView extends WatchUi.WatchFace {
     dc.setPenWidth(RELATIVE_RING_STROKE * width);
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 
-    var fieldTypes = [:HEART_RATE, :STEPS];
+		var fieldTypes = Application.getApp().fieldTypes;
+    System.println(fieldTypes);
 
     // Field Types has to be smaller than relative stat positions
     for (var i = 0; i < fieldTypes.size(); i += 1){
+      var fieldType = fieldTypes[i];
+
+      if (fieldType == FIELD_TYPE_NONE) {
+        continue;
+      }
+
       var offset = [RELATIVE_STAT_POSITIONS[i][0] * width, RELATIVE_STAT_POSITIONS[i][1] * width];
       var x1 = offset[0];
       var y1 = offset[1];
@@ -305,10 +322,9 @@ class KroniiView extends WatchUi.WatchFace {
       var value = "N/A";
       var iconColor = Graphics.COLOR_WHITE;
       var valueColor = Graphics.COLOR_WHITE;
-      var fieldType = fieldTypes[i];
 
       switch (fieldType) {
-        case :HEART_RATE:
+        case FIELD_TYPE_HEART_RATE:
           icon = "H";
           iconColor = Graphics.COLOR_RED;
 
@@ -335,7 +351,7 @@ class KroniiView extends WatchUi.WatchFace {
           }
 
           break;
-        case :STEPS:
+        case FIELD_TYPE_STEPS:
           icon = "S";
           iconColor = Graphics.COLOR_YELLOW;
 
