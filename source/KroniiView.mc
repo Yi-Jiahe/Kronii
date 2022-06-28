@@ -50,6 +50,15 @@ class KroniiView extends WatchUi.WatchFace {
     FIELD_TYPE_DISTANCE
   }
 
+  const iconCharacters = {
+    "HEART_OUTLINE" => "l",
+    "HEART" => "m",
+    "RUNNING" => "M",
+    "WALKING" => "Q",
+    "BLUETOOTH" => "V",
+    "CALORIES" => "X"
+  };
+
   var width;
   var height;
 
@@ -296,6 +305,7 @@ class KroniiView extends WatchUi.WatchFace {
     var activityInfo = ActivityMonitor.getInfo();
     var settings = System.getDeviceSettings();
 
+    var iconFont = WatchUi.loadResource(Rez.Fonts.Icons);
 
     // Field Types has to be smaller than relative stat positions
     for (var i = 0; i < fieldTypes.size(); i += 1){
@@ -328,7 +338,7 @@ class KroniiView extends WatchUi.WatchFace {
 
       switch (fieldType) {
         case FIELD_TYPE_HEART_RATE:
-          icon = "H";
+          icon = iconCharacters["HEART"];
           iconColor = Graphics.COLOR_RED;
 
 				  value = hrIterator.next().heartRate;
@@ -353,14 +363,14 @@ class KroniiView extends WatchUi.WatchFace {
 
           break;
         case FIELD_TYPE_STEPS:
-          icon = "S";
+          icon = iconCharacters["WALKING"];
           iconColor = Graphics.COLOR_YELLOW;
 
           value = activityInfo.steps;
 
           break;
         case FIELD_TYPE_DISTANCE:
-          icon = "D";
+          icon = iconCharacters["RUNNING"];
           iconColor = Graphics.COLOR_RED;
 
           value = activityInfo.distance.toFloat() / /* CM_PER_KM */ 100000;
@@ -385,7 +395,11 @@ class KroniiView extends WatchUi.WatchFace {
       }
 
       dc.setColor(iconColor, Graphics.COLOR_TRANSPARENT);
-      dc.drawText(offset[0], y1, Graphics.FONT_XTINY, icon, Graphics.TEXT_JUSTIFY_CENTER);
+      if (icon != "-") {
+        dc.drawText(offset[0], (y1 + y2) / 2, iconFont, icon, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+      } else {
+        dc.drawText(offset[0], (y1 + y2) / 2, Graphics.FONT_XTINY, icon, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+      }
       dc.setColor(valueColor, Graphics.COLOR_TRANSPARENT);
       dc.drawText(offset[0], y2, Graphics.FONT_XTINY, value, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
     }
