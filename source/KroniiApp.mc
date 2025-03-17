@@ -16,11 +16,11 @@ class KroniiApp extends Application.AppBase {
     // onStop() is called when your application is exiting
     function onStop(state as Dictionary?) as Void {
     }
-
+    
     // Return the initial view of your application here
-    function getInitialView() as Array<Views or InputDelegates>? {
+    function getInitialView() as [Views] or [Views, InputDelegates] {
         onSettingsChanged();
-        return [ new KroniiView() ] as Array<Views or InputDelegates>;
+        return [ new KroniiView() ];
     }
 
 	function getIntProperty(key, defaultValue) {
